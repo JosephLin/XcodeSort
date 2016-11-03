@@ -12,8 +12,20 @@ import XcodeKit
 class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
-        // Implement your command here, invoking the completion handler when done. Pass it nil on success, and an NSError on failure.
         
+        if let textRange = invocation.buffer.selections.firstObject as? XCSourceTextRange {
+            let diff = textRange.end.line - textRange.start.line
+            if diff > 0 {
+                let range = NSRange(location: textRange.start.line, length: diff + 1)
+                let lines = invocation.buffer.lines
+                if let selectedLines = lines.subarray(with: range) as? [String] {
+                    let sortedSelectedLines = selectedLines.sorted(by: { (a, b) -> Bool in
+                        return a.compare(b, options: [.numeric]) == .orderedAscending
+                    })
+                    lines.replaceObjects(in: range, withObjectsFrom: sortedSelectedLines)
+                }
+            }
+        }
         completionHandler(nil)
     }
     
