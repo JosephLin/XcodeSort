@@ -14,7 +14,8 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
         
         if let textRange = invocation.buffer.selections.firstObject as? XCSourceTextRange {
-            let diff = textRange.end.line - textRange.start.line
+            let endline = (textRange.end.column == 0) ? textRange.end.line - 1 : textRange.end.line
+            let diff = endline - textRange.start.line
             if diff > 0 {
                 let range = NSRange(location: textRange.start.line, length: diff + 1)
                 let lines = invocation.buffer.lines
@@ -28,5 +29,4 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
         }
         completionHandler(nil)
     }
-    
 }
